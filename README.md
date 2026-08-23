@@ -1,4 +1,4 @@
-# weTalk 💬
+# weTalk chat app
 
 A real-time one-to-one chat application built for simple and fast
 communication.
@@ -9,15 +9,15 @@ see when messages have been read.
 
 ## Features
 
-- 🔐 JWT-based authentication
-- 💬 Real-time one-to-one messaging
-- 🟢 Online and offline status
-- ⌨️ Typing indicators
-- ✓✓ Real-time read receipts
-- 🔎 User search
-- 💬 Private conversation management
-- ⚡ Redis caching and session management
-- 📱 Responsive interface
+- JWT-based authentication
+- Real-time one-to-one messaging
+- Online and offline status
+- Typing indicators
+- Real-time read receipts
+- User search
+- Private conversation management
+- Redis caching and session management
+- Responsive interface
 
 ## Tech Stack
 
