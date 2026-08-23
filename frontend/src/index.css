@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Message animations */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-animation {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Typing indicator animation */
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.typing-dot {
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Hide scrollbar for recent users strip */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Dark mode base */
+.dark body { background-color: #111827; color: #f9fafb; }
+.dark ::-webkit-scrollbar-track { background: #1f2937; }
+.dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+
+/* Font size — set on html so rem-based Tailwind text classes scale with it */
+html.font-size-small  { font-size: 13px !important; }
+html.font-size-medium { font-size: 16px !important; }
+html.font-size-large  { font-size: 20px !important; }
+
+/* Smooth transitions for theme and visibility changes */
+body, #root {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* All elements inherit smooth color/bg transitions for dark mode toggle */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+/* Exclude transitions that would break animations or layout */
+.typing-dot, .message-animation, input, textarea {
+  transition: none !important;
+}
+input, textarea {
+  color-scheme: light dark;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.dark input, .dark textarea {
+  color: #f9fafb;
+  background-color: #374151;
+}
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #9ca3af;
+}
+/* Auth pages: keep inputs white with black text even in dark mode */
+.auth-card input:not(.border-red-400) {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+.auth-card input.border-red-400 {
+  background-color: #fef2f2 !important;
+  color: #111827 !important;
+}
+.auth-card input::placeholder {
+  color: #9ca3af !important;
+}
+/* Ensure near-black text stays readable in dark mode (e.g. usernames, labels) */
+.dark .text-gray-900 { color: #f9fafb; }
+.dark .text-black { color: #f9fafb; }
+/* Auth headings remain black on the white authentication card. */
+.auth-card h1 { color: #000000 !important; }
+
+/* Toggle thumb smooth slide */
+.toggle-thumb {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+}
+.toggle-track {
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Last seen / status text fade */
+.status-text {
+  transition: opacity 0.35s ease, max-height 0.35s ease;
+}
+
+/* Toggle animation */
+.settings-fade-enter {
+  animation: settingsFadeIn 0.2s ease;
+}
+@keyframes settingsFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Modal animation */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-in {
+  animation: modalIn 0.2s ease-out;
+}

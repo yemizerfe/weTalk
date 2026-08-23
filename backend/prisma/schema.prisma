@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  avatar    String?
+  isOnline  Boolean  @default(false)
+  lastSeen  DateTime @updatedAt
+  isEmailVerified Boolean @default(false)
+  emailVerificationToken String?
+  emailVerificationExpires DateTime?
+  isDeleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  conversations1   Conversation[] @relation("ConversationUser1")
+  conversations2   Conversation[] @relation("ConversationUser2")
+  readReceipts     ReadReceipt[]
+  messageReactions MessageReaction[]
+  messageDeletions MessageDeletion[]
+  typingStatuses   TypingStatus[]
+  callsInitiated   Call[]         @relation("Caller")
+  callParticipants CallParticipant[]
+  webRTCSignals    WebRTCSignal[]
+  passwordResetTokens PasswordResetToken[]
+  notifications    Notification[]
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user1      User         @relation("ConversationUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2      User         @relation("ConversationUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages   Message[]
+  calls      Call[]
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+model Message {
+  id             String    @id @default(uuid())
+  conversationId String
+  senderId       String
+  receiverId     String
+  content        String
+  messageType    String    @default("text") // text, image, file
+  isRead         Boolean   @default(false)
+  isEdited       Boolean   @default(false)
+  editedAt       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User              @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User              @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  readReceipts ReadReceipt[]
+  reactions    MessageReaction[]
+  deletions    MessageDeletion[] // "delete for me" markers per user
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+model MessageDeletion {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model ReadReceipt {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId])
+}
+
+model TypingStatus {
+  id        String   @id @default(uuid())
+  userId    String
+  isTyping  Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model Call {
+  id            String     @id @default(uuid())
+  conversationId String
+  callerId      String
+  callType      String     @default("audio") // "audio" or "video"
+  status        String     @default("ringing") // "ringing", "in-progress", "ended", "missed", "rejected"
+  startedAt     DateTime?  @default(now())
+  endedAt       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  conversation  Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  caller        User         @relation("Caller", fields: [callerId], references: [id], onDelete: Cascade)
+  participants  CallParticipant[]
+  webRTCSignals WebRTCSignal[]
+
+  @@index([conversationId])
+  @@index([callerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CallParticipant {
+  id          String    @id @default(uuid())
+  callId      String
+  userId      String
+  joinedAt    DateTime? @default(now())
+  leftAt      DateTime?
+  isMuted     Boolean   @default(false)
+  hasVideo    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  call Call @relation(fields: [callId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([callId, userId])
+  @@index([callId])
+  @@index([userId])
+}
+
+model WebRTCSignal {
+  id           String    @id @default(uuid())
+  callId       String
+  senderId     String
+  signalType   String    // "offer", "answer", "candidate", "end"
+  signalData   String    // JSON string containing SDP or ICE candidate
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  call     Call @relation(fields: [callId], references: [id], onDelete: Cascade)
+  sender   User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([callId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // "message", "call_missed", "call_incoming", "friend_request", "system"
+  title     String
+  message   String
+  data      String?  // JSON string with additional data
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
