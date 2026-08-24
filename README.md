@@ -81,3 +81,22 @@ weTalk/
 │
 ├── .env.example
 └── README.md
+```
+## Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- Git
+- Docker
+- Docker Compose
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/yemizerfe/weTalk.git
+cd weTalk
+docker compose up
