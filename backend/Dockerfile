@@ -1,6 +1,6 @@
 
 # ── Dependencies stage ─────────────────────────────────────
-FROM node:18-bullseye-slim AS deps
+FROM node:20-bookworm-slim AS deps
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN npm ci
 
 
 # ── Builder stage ──────────────────────────────────────────
-FROM node:18-bullseye-slim AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -31,14 +31,14 @@ COPY src ./src/
 
 
 # ── Production runner stage ────────────────────────────────
-FROM node:18-bullseye-slim AS runner
+FROM node:20-bookworm-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends openssl ca-certificates wget \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system appgroup \
@@ -61,3 +61,4 @@ USER appuser
 EXPOSE 5001
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node src/server.js"]
+
