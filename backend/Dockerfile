@@ -1,4 +1,4 @@
-```dockerfile
+
 # ── Dependencies stage ─────────────────────────────────────
 FROM node:18-bullseye-slim AS deps
 
@@ -61,4 +61,3 @@ USER appuser
 EXPOSE 5001
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node src/server.js"]
-```
