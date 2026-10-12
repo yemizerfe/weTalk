@@ -1,40 +1,59 @@
 # ── deps stage ────────────────────────────────────────────────────────────────
-FROM node:18-alpine AS deps
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
+FROM node:18-bullseye-slim AS deps
 
-# ── builder stage (generates Prisma client) ───────────────────────────────────
-FROM node:18-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+
+RUN apt-get update 
+    && apt-get install -y --no-install-recommends openssl ca-certificates 
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+
+# ── builder stage ─────────────────────────────────────────────────────────────
+FROM node:18-bullseye-slim AS builder
+
+WORKDIR /app
+
+RUN apt-get update 
+    && apt-get install -y --no-install-recommends openssl ca-certificates 
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
 COPY prisma ./prisma/
 RUN npx prisma generate
+
 COPY src ./src/
 
+
 # ── runner stage ──────────────────────────────────────────────────────────────
-FROM node:18-alpine AS runner
+FROM node:18-bullseye-slim AS runner
+
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN apt-get update 
+    && apt-get install -y --no-install-recommends openssl ca-certificates wget 
+    && rm -rf /var/lib/apt/lists/*
 
-# Install wget for healthcheck
-RUN apk add --no-cache wget
+RUN groupadd --system appgroup 
+    && useradd --system --gid appgroup --home-dir /app appuser
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
 COPY --from=builder /app/src ./src
 COPY prisma ./prisma/
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-# Uploads directory
-RUN mkdir -p src/uploads && chown -R appuser:appgroup /app
+RUN mkdir -p src/uploads 
+    && chown -R appuser:appgroup /app
 
 USER appuser
 
