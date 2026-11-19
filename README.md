@@ -1,11 +1,10 @@
-# weTalk chat app
+# weTalk – Real-Time Chat Application
 
-A real-time one-to-one chat application built for simple and fast
-communication.
+A real-time one-to-one chat application built for simple and fast communication.
 
-weTalk allows users to find other users, start private conversations, send
-messages in real time, see online status, know when someone is typing, and
-see when messages have been read.
+**Live Application:** [https://we-talk-bay.vercel.app](https://we-talk-bay.vercel.app)
+
+weTalk allows users to find other users, start private conversations, send messages in real time, see online status, know when someone is typing, and see when messages have been read.
 
 ## Features
 
@@ -22,7 +21,6 @@ see when messages have been read.
 ## Tech Stack
 
 ### Frontend
-
 - React 18
 - Vite
 - React Router
@@ -34,7 +32,6 @@ see when messages have been read.
 - date-fns
 
 ### Backend
-
 - Node.js
 - Express.js
 - Socket.IO
@@ -47,15 +44,11 @@ see when messages have been read.
 
 ## How It Works
 
-The application uses a REST API for operations such as authentication,
-user management, conversations, and message history.
+The application uses a REST API for operations such as authentication, user management, conversations, and message history.
 
-Socket.IO handles real-time communication between connected users. When a
-message is sent, the server delivers it to the other participant immediately
-while also persisting it in PostgreSQL.
+Socket.IO handles real-time communication between connected users. When a message is sent, the server delivers it to the other participant immediately while also persisting it in PostgreSQL.
 
-Redis is used for fast-access data such as sessions, online presence,
-caching, and rate limiting.
+Redis is used for fast-access data such as sessions, online presence, caching, and rate limiting.
 
 ## Project Structure
 
@@ -82,6 +75,7 @@ weTalk/
 ├── .env.example
 └── README.md
 ```
+
 ## Getting Started
 
 ### Prerequisites
@@ -99,4 +93,12 @@ Clone the repository:
 ```bash
 git clone https://github.com/yemizerfe/weTalk.git
 cd weTalk
-docker compose up
+```
+
+Start the application using Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+The application will start using the services and configuration defined in your Docker Compose setup.
